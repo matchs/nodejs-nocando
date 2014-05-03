@@ -14,9 +14,7 @@
     "can",
     "cancan"
   ],
-  "dependencies": {
-    "collections" : "0.1.x"
-  },
+  "dependencies": {},
   "engines": {
     "node": "*"
   }
