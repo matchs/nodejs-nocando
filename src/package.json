@@ -1,10 +1,9 @@
 {
-  "author": "Mateus Chagas Sousa",
+  "author": "Mateus Chagas Sousa
   "name": "nocando",
   "description": "NoCanDo is a lightweight, easy to use and easy to set up authorization library for Node.js",
   "version": "0.1.0",
   "repository": {
-    "type" : "git",
     "url": "http://github.com/matchs/nodejs-nocando"
   },
   "main": "./lib/nocando",
@@ -16,7 +15,7 @@
     "cancan"
   ],
   "dependencies": {
-    "collections" : ">=0.1.4"
+    "collections" : "0.1.x"
   },
   "engines": {
     "node": "*"
