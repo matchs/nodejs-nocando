@@ -1,16 +1,40 @@
 var assert = require('assert');
+var nocando = require('../lib/nocando');
+
+
+var tautology = function(){
+    return true;
+};
+
+var contradiction = function(){
+    return false;
+};
+
+
 
 describe('Boolean Operators', function(){
     it('not', function(){
+      var negation = nocando.not(tautology);
 
+      assert.equal(false, negation());
     });
 
     it('or', function(){
-
+      var result = nocando.or(
+          tautology,
+          contradiction
+      );
+      
+      assert.equal(true, result());
     });
 
     it('and', function(){
-
+      var result = nocando.and(
+          tautology,
+          contradiction
+      );
+      
+      assert.equal(false, result());
     });
 });
 
