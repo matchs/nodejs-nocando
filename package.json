@@ -19,6 +19,9 @@
         "collections" : ">=0.1.4"
     },
     "engines": {
-        "node": "*"
+        "node" : "*"
+    },
+    "devDependencies":{
+        "mocha" : "latest"
     }
 }
