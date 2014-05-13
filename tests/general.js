@@ -10,8 +10,6 @@ var contradiction = function(){
     return false;
 };
 
-
-
 describe('Boolean Operators', function(){
     it('not', function(){
       var negation = nocando.not(tautology);
