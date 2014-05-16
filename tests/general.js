@@ -36,23 +36,53 @@ describe('Boolean Operators', function(){
     });
 });
 
-describe('Monads', function(){
-    it('MaybeMonad', function(){
 
-    });
 
-    if('StateMonad', function(){
 
-    });
-});
 
 describe('Registering authorizations', function(){
-    it('saveAuthorization', function(){
+    var allow_to_all = function(u, c, r){
+        return true;
+    };
 
+    var deny_to_all = function(u, c, r){
+        return false;
+    };
+
+    var dummy_resource_provider = function(u, c){
+        return {
+            name : 'dummy'
+        };
+    };
+
+    var dummy_auth_resource_provider = function(u, c, r){
+        r.profile = 'dummy_profile';
+        return r;
+    };
+
+    it('can authorized', function(){
+        var Auth = nocando.can('a', 'b', 
+            allow_to_all, 
+            dummy_resource_provider, 
+            dummy_auth_resource_provider);
+
+        var Maybe = Auth.authorize('a', 'b');
+
+        assert.equal('dummy', Maybe.maybe(false).name);
+        assert.equal('dummy_profile', Maybe.maybe(false).profile);
     });
 
-    it('can', function(){
+    it('can not authorized', function(){
+        var Auth = nocando.can('a', 'b', 
+            allow_to_all, 
+            dummy_resource_provider, 
+            dummy_auth_resource_provider);
 
+        var Maybe = Auth.authorize('a', 'c');
+
+        assert.equal(false, Maybe.maybe(false, function(v){
+            return v.name;
+        }));
     });
 
     it('revoke', function(){
