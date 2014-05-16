@@ -60,7 +60,7 @@ describe('Registering authorizations', function(){
         return r;
     };
 
-    it('can authorized', function(){
+    it("`can` authorizedi with resource provider", function(){
         var Auth = nocando.can('a', 'b', 
             allow_to_all, 
             dummy_resource_provider, 
@@ -72,8 +72,34 @@ describe('Registering authorizations', function(){
         assert.equal('dummy_profile', Maybe.maybe(false).profile);
     });
 
-    it('can not authorized', function(){
+    it("`can` not authorized", function(){
         var Auth = nocando.can('a', 'b', 
+            allow_to_all, 
+            dummy_resource_provider, 
+            dummy_auth_resource_provider);
+
+        var Maybe = Auth.authorize('a', 'c');
+
+        assert.equal(false, Maybe.maybe(false, function(v){
+            return v.name;
+        }));
+    });
+
+    it("`can` with * action authorized", function(){
+        var Auth = nocando.can('*', 'b', 
+            allow_to_all, 
+            dummy_resource_provider, 
+            dummy_auth_resource_provider);
+
+        var Maybe = Auth.authorize('a', 'b');
+
+        assert.equal("dummy", Maybe.maybe(false, function(v){
+            return v.name;
+        }));
+    });
+
+    it("`can` with * action not authorized", function(){
+        var Auth = nocando.can('*', 'b', 
             allow_to_all, 
             dummy_resource_provider, 
             dummy_auth_resource_provider);
