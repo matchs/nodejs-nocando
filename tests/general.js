@@ -65,7 +65,6 @@ describe('Registering authorizations', function(){
             allow_to_all); 
 
         var Maybe = Auth.authorize('a', 'b');
-
         assert.equal(true, Maybe.maybe(false));
     });
 
@@ -120,6 +119,37 @@ describe('Registering authorizations', function(){
         }));
     });
 
+    it("`can` chained calls", function(){
+        var Auth = nocando.can('a0', 'b', 
+            allow_to_all, 
+            dummy_resource_provider, 
+            dummy_auth_resource_provider)
+            .can('a1', 'b', 
+                allow_to_all, 
+                function(){
+                    return {
+                        name : "dummy2"
+                    };
+                }, 
+                dummy_auth_resource_provider);
+
+        var Maybe = Auth.authorize('a0', 'b');
+        assert.equal("dummy", Maybe.maybe(false, function(v){
+            return v.name;
+        }));
+
+        Maybe = Auth.authorize('a1', 'b');
+        assert.equal("dummy2", Maybe.maybe(false, function(v){
+            return v.name;
+        }));
+
+        Maybe = Auth.authorize('a2', 'b');
+        assert.equal(false, Maybe.maybe(false, function(v){
+            return v.name;
+        }));
+
+      
+    });
     it('revoke', function(){
 
     });
