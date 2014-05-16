@@ -60,7 +60,16 @@ describe('Registering authorizations', function(){
         return r;
     };
 
-    it("`can` authorizedi with resource provider", function(){
+    it("`can` authorized without resource provider", function(){
+        var Auth = nocando.can('a', 'b', 
+            allow_to_all); 
+
+        var Maybe = Auth.authorize('a', 'b');
+
+        assert.equal(true, Maybe.maybe(false));
+    });
+
+    it("`can` authorized with resource provider", function(){
         var Auth = nocando.can('a', 'b', 
             allow_to_all, 
             dummy_resource_provider, 
