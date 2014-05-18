@@ -147,9 +147,22 @@ describe('Registering authorizations', function(){
         assert.equal(false, Maybe.maybe(false, function(v){
             return v.name;
         }));
-
-      
     });
+
+    it('`can` try register duplicated authorization', function(){
+        var Auth = nocando.can('a', 'b', allow_to_all);
+        assert.throws(function(){
+            Auth.can('a', 'b', allow_to_all);
+        }, Error);
+    });
+
+    it('`can` try register duplicated authorization with *', function(){
+        var Auth = nocando.can('*', 'b', allow_to_all);
+        assert.throws(function(){
+            Auth.can('a', 'b', allow_to_all);
+        }, Error);
+    });
+
     it('revoke', function(){
 
     });
