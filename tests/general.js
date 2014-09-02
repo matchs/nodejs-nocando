@@ -1,46 +1,53 @@
-var assert = require('assert');
-var nocando = require('../lib/nocando');
+var assert = require('assert'),
+    nocando = require('../lib/nocando'),
+    RSVP = require('rsvp');
 
-
-var tautology = function(){
-    return true;
-};
-
-var contradiction = function(){
-    return false;
-};
 
 describe('Boolean Operators', function(){
-    it('not', function(){
-      var negation = nocando.not(tautology);
+    var tautology = function(){
+        return true;
+    };
 
-      assert.equal(false, negation());
+    var contradiction = function(){
+        return false;
+    };
+
+    it('not', function(){
+      assert.equal(false, nocando.not(tautology)());
+      assert.equal(true, nocando.not(contradiction)());
     });
 
     it('or', function(){
-      var result = nocando.or(
+      assert.equal(true, nocando.or(
           tautology,
           contradiction
-      );
-      
-      assert.equal(true, result());
+      )());
+
+      assert.equal(true, nocando.or(
+          tautology,
+          tautology
+      )());
+
+      assert.equal(false, nocando.or(
+          contradiction,
+          contradiction
+      )());
     });
 
     it('and', function(){
-      var result = nocando.and(
+      assert.equal(false, nocando.and(
           tautology,
           contradiction
-      );
-      
-      assert.equal(false, result());
+      )());
+
+      assert.equal(true, nocando.and(
+          tautology,
+          tautology
+      )());
     });
 });
 
-
-
-
-
-describe('Registering authorizations', function(){
+describe('Registering authorizations:', function(){
     var allow_to_all = function(u, c, r){
         return true;
     };
@@ -60,93 +67,123 @@ describe('Registering authorizations', function(){
         return r;
     };
 
-    it("`can` authorized without resource provider", function(){
-        var Auth = nocando.can('a', 'b', 
-            allow_to_all); 
+    var dummy_async_resource_provider = function(u, c, callback){
+        setTimeout(function(){
+            callback({
+                name : 'dummy'
+            });
+        }, 3); 
+    };
 
-        var Maybe = Auth.authorize('a', 'b');
-        assert.equal(true, Maybe.maybe(false));
+    var dummy_async_auth_resource_provider = function(u, c, r, callback){
+        setTimeout(function(){
+            callback({
+                name : 'dummy'
+            });
+        }, 3); 
+    };
+
+    var async_allow_to_all = function(u, c, async_r, callback){
+        async_r(function(e, r){
+            callback(e, r);
+        });
+    };
+
+    var async_deny_to_all = function(u, c, async_r, callback){
+        async_r(function(e, r){
+            callback(e, false);
+        });
+    };
+
+    it("`can` authorized without resource provider", function(done){
+        var Auth = nocando.can('a', 'b', allow_to_all); 
+
+        Auth.authorize('a', 'b')
+            .then(function(value){
+                assert.equal(true, value);
+                done();
+            });
     });
 
-    it("`can` authorized with resource provider", function(){
-        var Auth = nocando.can('a', 'b', 
-            allow_to_all, 
-            dummy_resource_provider, 
-            dummy_auth_resource_provider);
+    it("`can` authorized with resource provider", function(done){
+        var Auth = nocando.can('a', 'b', allow_to_all, 
+                   dummy_resource_provider, 
+                   dummy_auth_resource_provider);
 
-        var Maybe = Auth.authorize('a', 'b');
-
-        assert.equal('dummy', Maybe.maybe(false).name);
-        assert.equal('dummy_profile', Maybe.maybe(false).profile);
+        Auth.authorize('a', 'b')
+            .then(function(value){
+                assert.equal('dummy', value.name);
+                assert.equal('dummy_profile', value.profile);
+                done();
+            });
     });
 
-    it("`can` not authorized", function(){
+    it("`can` not authorized", function(done){
         var Auth = nocando.can('a', 'b', 
-            allow_to_all, 
-            dummy_resource_provider, 
-            dummy_auth_resource_provider);
+                   allow_to_all, 
+                   dummy_resource_provider, 
+                   dummy_auth_resource_provider);
 
-        var Maybe = Auth.authorize('a', 'c');
+        Auth.authorize('a', 'c')
+            .catch(function(value){
+                assert.equal(false, value);
+                done();
+            });
 
-        assert.equal(false, Maybe.maybe(false, function(v){
-            return v.name;
-        }));
     });
 
-    it("`can` with * action authorized", function(){
+    it("`can` with * action authorized", function(done){
         var Auth = nocando.can('*', 'b', 
-            allow_to_all, 
-            dummy_resource_provider, 
-            dummy_auth_resource_provider);
+                   allow_to_all, 
+                   dummy_resource_provider, 
+                   dummy_auth_resource_provider);
 
-        var Maybe = Auth.authorize('a', 'b');
-
-        assert.equal("dummy", Maybe.maybe(false, function(v){
-            return v.name;
-        }));
+        Auth.authorize('a', 'b')
+            .then(function(value){
+                assert.equal("dummy", value.name);
+                done();
+            });
     });
 
-    it("`can` with * action not authorized", function(){
+    it("`can` with * action not authorized", function(done){
         var Auth = nocando.can('*', 'b', 
-            allow_to_all, 
-            dummy_resource_provider, 
-            dummy_auth_resource_provider);
+                   allow_to_all, 
+                   dummy_resource_provider, 
+                   dummy_auth_resource_provider);
 
-        var Maybe = Auth.authorize('a', 'c');
-
-        assert.equal(false, Maybe.maybe(false, function(v){
-            return v.name;
-        }));
+        Auth.authorize('a', 'c')
+            .catch(function(value){
+                assert.equal(false, value);
+                done();
+            });
     });
 
-    it("`can` chained calls", function(){
-        var Auth = nocando.can('a0', 'b', 
-            allow_to_all, 
-            dummy_resource_provider, 
-            dummy_auth_resource_provider)
-            .can('a1', 'b', 
+    it("`can` chained calls", function(done){
+        var Auth = nocando
+            .can('a0', 'b', 
                 allow_to_all, 
-                function(){
-                    return {
-                        name : "dummy2"
-                    };
-                }, 
-                dummy_auth_resource_provider);
+                dummy_resource_provider, 
+                dummy_auth_resource_provider)
 
-        var Maybe = Auth.authorize('a0', 'b');
-        assert.equal("dummy", Maybe.maybe(false, function(v){
-            return v.name;
-        }));
+            .can('a1', 'b', allow_to_all, 
+                 function(){
+                     return {
+                         name : "dummy2"
+                     };
+                 }, 
+                 dummy_auth_resource_provider);
 
-        Maybe = Auth.authorize('a1', 'b');
-        assert.equal("dummy2", Maybe.maybe(false, function(v){
-            return v.name;
-        }));
+        var results = [];
 
-        Maybe = Auth.authorize('a2', 'b');
-        assert.equal(false, Maybe.maybe(false, function(v){
-            return v.name;
-        }));
+        results.push(Auth.authorize('a0', 'b'));
+        results.push(Auth.authorize('a1', 'b'));
+
+        RSVP.all(results)
+          .then(function(values){
+                assert.equal("dummy", values[0].name);
+                assert.equal("dummy2", values[1].name);
+                done();              
+          });
     });
 
     it('`can` try register duplicated authorization', function(){
@@ -163,17 +200,22 @@ describe('Registering authorizations', function(){
         }, Error);
     });
 
-    it('revoke', function(){
+    it('`can` async resource provider', function(done){
+        //TODO
+        done(); 
+    });
 
+    it('`can` async authorized resource provider', function(done){
+        //TODO
+        done(); 
+    });
+
+    it('revoke', function(){
+        //TODO
     });
 
     it('override', function(){
-
+        //TODO
     });
 });
 
-
-describe('Authorizing', function(){
-  
-
-});
