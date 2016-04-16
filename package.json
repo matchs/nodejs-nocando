@@ -1,0 +1,32 @@
+{
+  "name": "nocando",
+  "version": "1.0.0",
+  "description": "A small, flexible, easy-to-setup and easy-to-use authorization library",
+  "main": "nocando.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com-matchs:matchs/nodejs-nocando.git"
+  },
+  "keywords": [
+    "authorization",
+    "auth",
+    "permission",
+    "can",
+    "cancan",
+    "pycan",
+    "acl",
+    "whitelist"
+  ],
+  "author": "Mateus Chagas Sousa <mateuschs@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "codecov": "^1.0.1",
+    "istanbul": "^0.4.3",
+    "mocha": "^2.4.5",
+    "mocha-sinon": "^1.1.5",
+    "sinon": "^1.17.3"
+  }
+}
